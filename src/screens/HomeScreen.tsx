@@ -71,7 +71,7 @@ export default function HomeScreen() {
       <View style={styles.topBar}>
         <View>
           <Text style={styles.greeting}>
-            Olá, {tutor?.name?.split(' ')[0] ?? 'Tutor'} 👋
+            Olá, {tutor?.name?.split(' ')[0] ?? 'Tutor'} 
           </Text>
           <Text style={styles.greetingSub}>Como está seu pet hoje?</Text>
         </View>
@@ -182,7 +182,6 @@ export default function HomeScreen() {
               activeOpacity={0.8}
             >
               <Text style={styles.weightButtonText}>Ver controle de peso</Text>
-              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -287,12 +286,14 @@ const styles = StyleSheet.create({
   emptyPetText: { fontSize: 14, color: '#5F6B7A', marginBottom: 6 },
   emptyPetLink: { fontSize: 14, color: '#1E88E5', fontWeight: '700' },
   nextEventCard: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
     borderRadius: 14,
     padding: 14,
     marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#1E88E5',
+  
   },
   nextEventHeader: {
     flexDirection: 'row',
