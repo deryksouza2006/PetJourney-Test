@@ -14,7 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Tutor } from '../types';
 import AppButton from '../components/AppButton';
 import AppInput from '../components/AppInput';
-import { saveTutor } from '../services/storageService';
+import { saveTutor, saveUser, createSession } from '../services/storageService';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'RegisterTutor'>;
@@ -57,6 +57,8 @@ export default function RegisterTutorScreen({ navigation }: Props) {
         plan: 'Free',
       };
       await saveTutor(tutor);
+      await saveUser(tutor);
+      await createSession(tutor.id);
       navigation.navigate('PetForm', { isFirst: true });
     } catch (e) {
       Alert.alert('Erro', 'Não foi possível salvar o cadastro.');

@@ -28,6 +28,7 @@ export interface Reminder {
   title: string;
   type: ReminderType;
   date: string;
+  time?: string;
   observation?: string;
   status: ReminderStatus;
 }

@@ -38,6 +38,7 @@ export default function ReminderFormScreen() {
   const [title, setTitle] = useState('');
   const [type, setType] = useState<ReminderType | ''>('');
   const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
   const [observation, setObservation] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -46,6 +47,18 @@ export default function ReminderFormScreen() {
     if (digits.length <= 2) return digits;
     if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
     return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`;
+  }
+
+  function formatTimeInput(text: string): string {
+    const digits = text.replace(/\D/g, '');
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}:${digits.slice(2, 4)}`;
+  }
+
+  function isValidTime(timeStr: string): boolean {
+    if (!/^\d{2}:\d{2}$/.test(timeStr)) return false;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
   }
 
   function parseDateToISO(dateStr: string): string | null {
@@ -72,6 +85,10 @@ export default function ReminderFormScreen() {
       Alert.alert('Data inválida', 'Por favor, informe a data no formato DD/MM/AAAA.');
       return;
     }
+    if (time.trim() && !isValidTime(time.trim())) {
+      Alert.alert('Horário inválido', 'Por favor, informe o horário no formato HH:MM (00:00 a 23:59).');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -87,6 +104,7 @@ export default function ReminderFormScreen() {
         title: title.trim(),
         type: type as ReminderType,
         date: isoDate,
+        time: time.trim() || undefined,
         observation: observation.trim() || undefined,
         status: 'Pendente',
       };
@@ -156,6 +174,15 @@ export default function ReminderFormScreen() {
             />
 
             <AppInput
+              label="Horário (opcional)"
+              value={time}
+              onChangeText={(v) => setTime(formatTimeInput(v))}
+              placeholder="HH:MM"
+              keyboardType="numeric"
+              maxLength={5}
+            />
+
+            <AppInput
               label="Observação (opcional)"
               value={observation}
               onChangeText={setObservation}
@@ -178,7 +205,7 @@ export default function ReminderFormScreen() {
                   <Text style={styles.previewDetail}>Tipo: {type}</Text>
                 ) : null}
                 {date ? (
-                  <Text style={styles.previewDetail}>Data: {date}</Text>
+                  <Text style={styles.previewDetail}>Data: {date}{time ? ` • ${time}` : ''}</Text>
                 ) : null}
                 {observation ? (
                   <Text style={styles.previewDetail}>Obs: {observation}</Text>

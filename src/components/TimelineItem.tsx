@@ -48,7 +48,7 @@ export default function TimelineItem({ reminder, isLast = false }: TimelineItemP
       </View>
       <View style={styles.content}>
         <View style={styles.row}>
-          <Text style={styles.date}>{formatShortDate(reminder.date)}</Text>
+          <Text style={styles.date}>{formatShortDate(reminder.date)}{reminder.time ? ` ${reminder.time}` : ''}</Text>
           <Text style={styles.icon}>{getTypeIcon(reminder.type)}</Text>
           <Text style={[styles.title, isDone && styles.titleDone]}>{reminder.title}</Text>
         </View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#1E88E5',
-    minWidth: 42,
+    minWidth: 80,
   },
   icon: {
     fontSize: 14,

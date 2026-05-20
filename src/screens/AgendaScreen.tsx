@@ -40,7 +40,11 @@ export default function AgendaScreen() {
     if (selectedPet) {
       const allReminders = await getReminders();
       const filtered = allReminders.filter((r) => r.petId === selectedPet.id);
-      const sorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
+      const sorted = [...filtered].sort((a, b) => {
+        const dateCompare = a.date.localeCompare(b.date);
+        if (dateCompare !== 0) return dateCompare;
+        return (a.time ?? '').localeCompare(b.time ?? '');
+      });
       setReminders(sorted);
     } else {
       setReminders([]);
@@ -105,17 +109,21 @@ export default function AgendaScreen() {
         showsVerticalScrollIndicator={false}
       >
         {reminders.length === 0 ? (
-          <View style={styles.empty}>
-            <Text style={styles.emptyIcon}>📅</Text>
-            <Text style={styles.emptyTitle}>Nenhum lembrete cadastrado</Text>
-            <Text style={styles.emptyText}>
-              Adicione lembretes de vacinas, consultas, banhos e muito mais.
-            </Text>
-            <AppButton
-              title="Criar primeiro lembrete"
-              onPress={() => navigation.navigate('ReminderForm')}
-              style={styles.emptyBtn}
-            />
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyCard}>
+              <View style={styles.emptyIconCircle}>
+                <Text style={styles.emptyIconText}>📅</Text>
+              </View>
+              <Text style={styles.emptyTitle}>Tudo em dia!</Text>
+              <Text style={styles.emptyText}>
+                Você ainda não possui lembretes.{'\n'}Crie um para acompanhar a saúde do seu pet.
+              </Text>
+              <AppButton
+                title="Criar primeiro lembrete"
+                onPress={() => navigation.navigate('ReminderForm')}
+                style={styles.emptyBtn}
+              />
+            </View>
           </View>
         ) : (
           <>
@@ -190,6 +198,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingBottom: 32,
+    flexGrow: 1,
   },
   section: { marginBottom: 8 },
   sectionTitle: {
@@ -200,12 +209,32 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  empty: {
-    alignItems: 'center',
-    paddingVertical: 48,
-    paddingHorizontal: 24,
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 24,
   },
-  emptyIcon: { fontSize: 56, marginBottom: 16 },
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F0F3F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  emptyIconText: { fontSize: 36 },
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',

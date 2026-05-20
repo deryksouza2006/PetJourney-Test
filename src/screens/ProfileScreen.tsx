@@ -17,7 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, Tutor } from '../types';
 import AppButton from '../components/AppButton';
 import AppInput from '../components/AppInput';
-import { getTutor, saveTutor, getPets } from '../services/storageService';
+import { getTutor, saveTutor, getPets, logoutUser } from '../services/storageService';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -80,7 +80,13 @@ export default function ProfileScreen() {
       {
         text: 'Sair',
         style: 'destructive',
-        onPress: () => navigation.navigate('Login'),
+        onPress: async () => {
+          await logoutUser();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Welcome' }],
+          });
+        },
       },
     ]);
   }

@@ -1,30 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pet } from '../types';
+import { getPetImage } from '../helpers/petImages';
 
 interface PetCardProps {
   pet: Pet;
   isSelected?: boolean;
   onPress?: () => void;
-}
-
-function getSpeciesIcon(species: string): string {
-  switch (species.toLowerCase()) {
-    case 'cachorro':
-      return '🐕';
-    case 'gato':
-      return '🐈';
-    case 'pássaro':
-    case 'passaro':
-      return '🦜';
-    case 'peixe':
-      return '🐟';
-    case 'coelho':
-      return '🐇';
-    default:
-      return '🐾';
-  }
 }
 
 export default function PetCard({ pet, isSelected = false, onPress }: PetCardProps) {
@@ -34,8 +17,8 @@ export default function PetCard({ pet, isSelected = false, onPress }: PetCardPro
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={styles.iconContainer}>
-        <Text style={styles.speciesIcon}>{getSpeciesIcon(pet.species)}</Text>
+      <View style={styles.imageContainer}>
+        <Image source={getPetImage(pet.species)} style={styles.petImage} />
       </View>
       <View style={styles.info}>
         <View style={styles.nameRow}>
@@ -82,17 +65,18 @@ const styles = StyleSheet.create({
     borderColor: '#1E88E5',
     backgroundColor: '#F0F8FF',
   },
-  iconContainer: {
+  imageContainer: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: '#E3F2FD',
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
     marginRight: 14,
+    backgroundColor: '#E3F2FD',
   },
-  speciesIcon: {
-    fontSize: 26,
+  petImage: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
   },
   info: {
     flex: 1,

@@ -70,7 +70,9 @@ export default function ReminderCard({
 
         <View style={styles.dateRow}>
           <Ionicons name="calendar-outline" size={14} color="#5F6B7A" />
-          <Text style={styles.date}> {formatDate(reminder.date)}</Text>
+          <Text style={styles.date}>
+            {' '}{formatDate(reminder.date)}{reminder.time ? ` • ${reminder.time}` : ''}
+          </Text>
         </View>
 
         {reminder.observation ? (

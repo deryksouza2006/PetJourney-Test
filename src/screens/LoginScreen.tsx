@@ -9,11 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  Alert,
+  Image,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import AppButton from '../components/AppButton';
 import AppInput from '../components/AppInput';
+import { loginUser } from '../services/storageService';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -22,9 +25,34 @@ type Props = {
 export default function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleLogin() {
-    navigation.navigate('MainTabs');
+  async function handleLogin() {
+    if (!email.trim()) {
+      Alert.alert('Campo obrigatório', 'Por favor, informe seu e-mail.');
+      return;
+    }
+    if (!password.trim()) {
+      Alert.alert('Campo obrigatório', 'Por favor, informe sua senha.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await loginUser(email.trim(), password);
+      if (result.success) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainTabs' }],
+        });
+      } else {
+        Alert.alert('Erro no login', result.error ?? 'Não foi possível entrar.');
+      }
+    } catch {
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar entrar.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -39,7 +67,12 @@ export default function LoginScreen({ navigation }: Props) {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.logoIcon}>🐾</Text>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={require('../../assets/logo.png')}
+                style={styles.logoImage}
+              />
+            </View>
             <Text style={styles.title}>Entrar na PetJourney</Text>
             <Text style={styles.subtitle}>Bem-vindo de volta!</Text>
           </View>
@@ -61,7 +94,12 @@ export default function LoginScreen({ navigation }: Props) {
               isPassword
             />
 
-            <AppButton title="Entrar" onPress={handleLogin} style={styles.btn} />
+            <AppButton
+              title="Entrar"
+              onPress={handleLogin}
+              loading={loading}
+              style={styles.btn}
+            />
 
             <TouchableOpacity
               style={styles.registerBtn}
@@ -72,10 +110,6 @@ export default function LoginScreen({ navigation }: Props) {
               </Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.disclaimer}>
-            Acesso simulado para protótipo — nenhuma autenticação real.
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -96,9 +130,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 36,
   },
-  logoIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+  logoWrapper: {
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    resizeMode: 'cover',
   },
   title: {
     fontSize: 24,
@@ -135,10 +172,5 @@ const styles = StyleSheet.create({
   registerLink: {
     color: '#1E88E5',
     fontWeight: '700',
-  },
-  disclaimer: {
-    fontSize: 12,
-    color: '#9BA8B4',
-    textAlign: 'center',
   },
 });

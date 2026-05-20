@@ -8,7 +8,80 @@ const KEYS = {
   SELECTED_PET_ID: '@petjourney:selectedPetId',
   REMINDERS: '@petjourney:reminders',
   WEIGHT_RECORDS: '@petjourney:weightRecords',
+  USER: '@petjourney_user',
+  SESSION: '@petjourney_session',
 };
+
+// ─── AUTH ────────────────────────────────────────────────
+
+export async function saveUser(tutor: Tutor): Promise<void> {
+  try {
+    await AsyncStorage.setItem(KEYS.USER, JSON.stringify(tutor));
+  } catch (e) {
+    console.error('Erro ao salvar usuário', e);
+  }
+}
+
+export async function getUser(): Promise<Tutor | null> {
+  try {
+    const json = await AsyncStorage.getItem(KEYS.USER);
+    if (json) return JSON.parse(json) as Tutor;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function createSession(tutorId: string): Promise<void> {
+  try {
+    await AsyncStorage.setItem(
+      KEYS.SESSION,
+      JSON.stringify({ active: true, tutorId })
+    );
+  } catch (e) {
+    console.error('Erro ao criar sessão', e);
+  }
+}
+
+export async function getSession(): Promise<{ active: boolean; tutorId: string } | null> {
+  try {
+    const json = await AsyncStorage.getItem(KEYS.SESSION);
+    if (json) return JSON.parse(json);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function loginUser(
+  email: string,
+  password: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getUser();
+    if (!user) {
+      return { success: false, error: 'Nenhuma conta encontrada. Crie uma conta primeiro.' };
+    }
+    if (user.email.toLowerCase() !== email.toLowerCase()) {
+      return { success: false, error: 'E-mail ou senha incorretos.' };
+    }
+    if (user.password !== password) {
+      return { success: false, error: 'E-mail ou senha incorretos.' };
+    }
+    await createSession(user.id);
+    return { success: true };
+  } catch {
+    return { success: false, error: 'Erro ao realizar login.' };
+  }
+}
+
+export async function logoutUser(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(KEYS.SESSION);
+  } catch (e) {
+    console.error('Erro ao fazer logout', e);
+  }
+}
 
 // ─── TUTOR ───────────────────────────────────────────────
 
@@ -54,6 +127,16 @@ export async function savePet(pet: Pet): Promise<void> {
     await AsyncStorage.setItem(KEYS.PETS, JSON.stringify(pets));
   } catch (e) {
     console.error('Erro ao salvar pet', e);
+  }
+}
+
+export async function deletePet(petId: string): Promise<void> {
+  try {
+    const pets = await getPets();
+    const updated = pets.filter((p) => p.id !== petId);
+    await AsyncStorage.setItem(KEYS.PETS, JSON.stringify(updated));
+  } catch (e) {
+    console.error('Erro ao excluir pet', e);
   }
 }
 

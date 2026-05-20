@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -13,11 +14,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, Pet, Reminder, Tutor } from '../types';
 import TimelineItem from '../components/TimelineItem';
-import {
-  getTutor,
-  getSelectedPet,
-  getReminders,
-} from '../services/storageService';
+import {getTutor, getSelectedPet, getReminders} from '../services/storageService';
+import { getPetImage } from '../helpers/petImages';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -42,7 +40,11 @@ export default function HomeScreen() {
         setPet(p);
         if (p) {
           const filtered = allReminders.filter((r) => r.petId === p.id);
-          const sorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
+          const sorted = [...filtered].sort((a, b) => {
+            const dateCompare = a.date.localeCompare(b.date);
+            if (dateCompare !== 0) return dateCompare;
+            return (a.time ?? '').localeCompare(b.time ?? '');
+          });
           setReminders(sorted);
         }
       }
@@ -91,7 +93,9 @@ export default function HomeScreen() {
         {pet ? (
           <View style={styles.petCard}>
             <View style={styles.petCardLeft}>
-              <Text style={styles.petIcon}>🐾</Text>
+              <View style={styles.petImageContainer}>
+                <Image source={getPetImage(pet.species)} style={styles.petImage} />
+              </View>
               <View>
                 <Text style={styles.petName}>{pet.name}</Text>
                 <Text style={styles.petInfo}>
@@ -124,7 +128,7 @@ export default function HomeScreen() {
             </View>
             <Text style={styles.nextEventTitle}>{nextEvent.title}</Text>
             <Text style={styles.nextEventDate}>
-              {nextEvent.type} • {formatDate(nextEvent.date)}
+              {nextEvent.type} • {formatDate(nextEvent.date)}{nextEvent.time ? ` • ${nextEvent.time}` : ''}
             </Text>
           </View>
         )}
@@ -149,11 +153,14 @@ export default function HomeScreen() {
             </View>
           ) : (
             <View style={styles.emptyTimeline}>
-              <Text style={styles.emptyTimelineText}>
-                Nenhum evento cadastrado para este mês.
+              <View style={styles.emptyIconCircle}>
+                <Text style={styles.emptyTimelineIcon}>✨</Text>
+              </View>
+              <Text style={styles.emptyTimelineTitle}>
+                Nenhum evento este mês
               </Text>
               <Text style={styles.emptyTimelineSub}>
-                Acesse a Agenda para criar seus lembretes.
+                Acesse a Agenda para criar seus primeiros lembretes e acompanhar a saúde do seu pet.
               </Text>
             </View>
           )}
@@ -254,7 +261,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  petIcon: { fontSize: 32 },
+  petImageContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: '#1E88E5',
+  },
+  petImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
   petName: {
     fontSize: 18,
     fontWeight: '800',
@@ -288,8 +306,10 @@ const styles = StyleSheet.create({
   nextEventCard: {
     backgroundColor: '#FFFFFF',
     shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
     borderRadius: 14,
     padding: 14,
     marginBottom: 20,
@@ -343,16 +363,38 @@ const styles = StyleSheet.create({
   },
   emptyTimeline: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 20,
+    padding: 32,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  emptyTimelineText: { fontSize: 14, color: '#5F6B7A', marginBottom: 6 },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: '#F0F3F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTimelineIcon: {
+    fontSize: 32,
+  },
+  emptyTimelineTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#101820',
+    marginBottom: 8,
+  },
   emptyTimelineSub: {
-    fontSize: 13,
-    color: '#9BA8B4',
+    fontSize: 14,
+    color: '#5F6B7A',
     textAlign: 'center',
-    marginTop: 4,
+    lineHeight: 20,
   },
   healthCard: {
     backgroundColor: '#FFFFFF',

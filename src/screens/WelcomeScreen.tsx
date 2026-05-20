@@ -1,31 +1,68 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types';
 import AppButton from '../components/AppButton';
+import { getSession } from '../services/storageService';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Welcome'>;
 };
 
 export default function WelcomeScreen({ navigation }: Props) {
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const session = await getSession();
+        if (session?.active) {
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'MainTabs' }],
+          });
+          return;
+        }
+      } catch {
+        // sem sessão ativa, continua na Welcome
+      }
+      setChecking(false);
+    }
+    checkSession();
+  }, []);
+
+  if (checking) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <StatusBar barStyle="light-content" backgroundColor="#101820" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#1E88E5" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#101820" />
       <View style={styles.container}>
         <View style={styles.hero}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoIcon}>🐾</Text>
+          <View style={styles.logoWrapper}>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.logoImage}
+            />
           </View>
-          <Text style={styles.appName}>PetJourney</Text>
           <Text style={styles.tagline}>
-            A jornada de saúde do seu pet, organizada e contínua.
+            A jornada de saúde do seu pet,{'\n'}organizada e contínua.
           </Text>
           <Text style={styles.description}>
             Acompanhe lembretes, consultas, vacinas e peso do seu pet em um só lugar.
@@ -50,6 +87,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#101820',
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     paddingHorizontal: 28,
@@ -62,29 +104,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#1E88E5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    shadowColor: '#1E88E5',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+  logoWrapper: {
+    
   },
-  logoIcon: {
-    fontSize: 48,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    letterSpacing: 1,
-    marginBottom: 16,
+  logoImage: {
+    width: 140,
+    height: 140,
+    resizeMode: 'cover',
   },
   tagline: {
     fontSize: 17,
